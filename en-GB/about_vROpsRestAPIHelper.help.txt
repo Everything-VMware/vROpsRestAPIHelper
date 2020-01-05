@@ -1,17 +1,14 @@
 TOPIC
-		about_$($ModuleName)
+		about_vROpsRestAPIHelper
 
 SHORT DESCRIPTION
-		Default: A short, one-line description of the topic contents.
+		PowerShell wrapper for vROps REST API.
 
 LONG DESCRIPTION
-		Default: A detailed, full description of the subject or purpose of the module.
+		PowerShell wrapper for vROps REST API.This wrapper should make it easier to get information from vROps instances.
 
 EXAMPLES
-		Default: Examples of how to use the module or how the subject feature works in practice.
-
-KEYWORDS
-		Default: Terms or titles on which you might expect your users to search for the information in this topic.
+		$AuthToken = Connect-vROpsRASession -OMServer vROpsOMServer.CentralIndustrial.eu -Credentials $Creds
 
 SEE ALSO
-		Default: Text-only references for further reading. Hyperlinks cannot work in the Windows PowerShell console.
+		VMware's documentation on the topic

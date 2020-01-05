@@ -37,7 +37,7 @@ Function Get-vROpsResources
 
 		.Notes
 			.NOTES
-			Version:			1.0
+			Version:			0.1
 			Author:				Lars Panzerbjørn
 			Creation Date:		2019.11.22
 			Purpose/Change:		Initial script development
@@ -93,33 +93,83 @@ Function Get-vROpsResources
 	Process
 	{
 		Write-Verbose "Processing"
-		Try
+		IF ($Type -eq "JSON")
 		{
-			DO
+			Try
 			{
-				Write-Verbose "Page $($Page)"
-				IF (!([string]::IsNullOrEmpty($ResourceKind))) {$ResourcesURL = $BaseURL + "adapterkinds/" + $ResourceKind + "/resources/?page=$page&pageSize=$PageSize"} #A stylistic choice was made here to highlight thee BaseURL and ResourceKind. Page and PageSize weren't so important to highlight.
-				IF ([string]::IsNullOrEmpty($ResourceKind)) {$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize"}
-				$Resources = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL -verbose
-				$Resourcelist += $Resources.resources.Resource
-				$Page++
+				DO
+				{
+					Write-Verbose "Page $($Page)"
+					IF (!([string]::IsNullOrEmpty($ResourceKind)))
+					{
+						Write-Verbose "Using ResourceKind: $($ResourceKind)"
+						$ResourcesURL = $BaseURL + "adapterkinds/" + $ResourceKind + "/resources/?page=$page&pageSize=$PageSize"
+					}
+					IF ([string]::IsNullOrEmpty($ResourceKind))
+					{
+						Write-Verbose "Getting all Resources"
+						$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize"
+					}
+					$Resources = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL
+					$Resourcelist += $Resources.resourceList
+					$Page++
+				}
+				UNTIL (($Resources.links.href | Select -first 1) -eq ($Resources.links.href | Select -last 1))
 			}
-			UNTIL (($Resources.resources.links.link.href | Select -first 1) -eq ($Resources.resources.links.link.href | Select -last 1))
-		}
-		Catch [System.Net.WebException]
-		{
-			IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
+			Catch [System.Net.WebException]
 			{
-				Write-Warning "Failed to login. The remote server returned an error: (401) Unauthorized."
+				IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
+				{
+					Write-Warning "Failed to login. The remote server returned an error: (401) Unauthorized."
+				}
+			}
+			Catch
+			{
+				Write-Warning "Failed to get resources.
+					Exception:	$(($PSItem | Get-ErrorInfo).Exception)
+					Reason: 	$(($PSItem | Get-ErrorInfo).Reason)
+					Fullname:	$(($PSItem | Get-ErrorInfo).Fullname)
+				"
 			}
 		}
-		Catch
+		IF ($Type -eq "XML")
 		{
-			Write-Warning "Failed to get resources.
-				Exception:	$(($PSItem | Get-ErrorInfo).Exception)
-				Reason: 	$(($PSItem | Get-ErrorInfo).Reason)
-				Fullname:	$(($PSItem | Get-ErrorInfo).Fullname)
-			"
+			Try
+			{
+				DO
+				{
+					Write-Verbose "Page $($Page)"
+					IF (!([string]::IsNullOrEmpty($ResourceKind)))
+					{
+						Write-Verbose "Using ResourceKind: $($ResourceKind)"
+						$ResourcesURL = $BaseURL + "adapterkinds/" + $ResourceKind + "/resources/?page=$page&pageSize=$PageSize"
+					}
+					IF ([string]::IsNullOrEmpty($ResourceKind))
+					{
+						Write-Verbose "Getting all Resources"
+						$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize"
+					}
+					$Resources = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL
+					$Resourcelist += $Resources.resourceList
+					$Page++
+				}
+				UNTIL (($Resources.links.href | Select -first 1) -eq ($Resources.links.href | Select -last 1))
+			}
+			Catch [System.Net.WebException]
+			{
+				IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
+				{
+					Write-Warning "Failed to login. The remote server returned an error: (401) Unauthorized."
+				}
+			}
+			Catch
+			{
+				Write-Warning "Failed to get resources.
+					Exception:	$(($PSItem | Get-ErrorInfo).Exception)
+					Reason: 	$(($PSItem | Get-ErrorInfo).Reason)
+					Fullname:	$(($PSItem | Get-ErrorInfo).Fullname)
+				"
+			}
 		}
 	}
 	End

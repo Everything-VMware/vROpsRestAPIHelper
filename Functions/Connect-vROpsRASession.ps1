@@ -132,7 +132,7 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 	{
 		Try
 		{
-			$AuthResponse = Invoke-RestMethod @AuthResponseSplat -Headers $Headers
+			$AuthResponse = Invoke-RestMethod @AuthResponseSplat -Headers $Headers -ErrorAction STOP
 		}
 		Catch [System.Net.WebException]
 		{
@@ -141,18 +141,21 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 				Write-Warning "You are unable to connect to the remote server."
 				Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
+				Return "$(($PSItem|Get-ErrorInfo).Exception)"
 			}
 			ELSEIF (($PSItem|Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
 			{
 				Write-Warning "You are unauthorised to connect to the remote server."
 				Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
+				Return "$(($PSItem|Get-ErrorInfo).Exception)"
 			}
 			ELSE
 			{
 				Write-Warning "You are not allowing untrusted SSL certs. Good, you shouldn't. Please try again using the -UseUntrustedSSLCertificates switch.`n Or even better, fix your certs ;-`)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
+				Return "$(($PSItem|Get-ErrorInfo).Exception)"
 			}
 		}
 		Catch [System.NullReferenceException]
@@ -160,12 +163,14 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 			Write-Warning "Object reference not set to an instance of an object."
 			Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 			Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
+			Return "$(($PSItem|Get-ErrorInfo).Exception)"
 		}
 		Catch
 		{
 			Write-Warning "Something Happened"
 			Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 			Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
+			Return "$(($PSItem|Get-ErrorInfo).Exception)"
 		}
 	}
 	End
