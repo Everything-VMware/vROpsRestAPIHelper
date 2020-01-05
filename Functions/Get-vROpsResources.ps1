@@ -37,7 +37,7 @@ Function Get-vROpsResources
 
 		.Notes
 			.NOTES
-			Version:			0.1
+			Version:			1.0
 			Author:				Lars Panzerbjørn
 			Creation Date:		2019.11.22
 			Purpose/Change:		Initial script development

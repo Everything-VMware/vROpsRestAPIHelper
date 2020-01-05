@@ -33,7 +33,6 @@ Function Get-vROpsRelationship
 		.Notes
 			.NOTES
 			Version:			1.1
-			Original Author:	David Kritschgau
 			Continuing Author:	Lars Panzerbjørn
 			Creation Date:		2019.11.22
 			Purpose/Change:		Initial script development
