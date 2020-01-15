@@ -1,11 +1,11 @@
-Function Get-vROpsAdapterKind
+Function Get-vROpsResourceKind
 {
 	<#
 		.Synopsis
-			Collects AdapterKinds from vROps via REST API.
+			Collects ResourceKinds from vROps via REST API.
 
 		.DESCRIPTION
-			Collects AdapterKinds from vROps Operations Manager server via REST API.
+			Collects ResourceKinds from vROps Operations Manager server via REST API.
 
 		.PARAMETER OMServer
 			FQDN or IP address of Operations Manager server to connect to.
@@ -18,19 +18,19 @@ Function Get-vROpsAdapterKind
 
 		.EXAMPLE
 			$AuthToken = (Connect-vROpsRASession -OMServer vROpsOMServer.CentralIndustrial.eu -Credentials $OMCreds).Token
-			Get-vROpsAdapterKind -OMServer vROpsOMServer.CentralIndustrial.eu -AuthToken $AuthToken
+			Get-vROpsResourceKind -OMServer vROpsOMServer.CentralIndustrial.eu -AuthToken $AuthToken
 
 		.EXAMPLE
 			$AuthResource = Connect-vROpsRASession -OMServer 10.11.12.13 -Credentials $OMCreds -UseUntrustedSSLCertificates
-			Get-vROpsAdapterKind -OMServer 10.11.12.13 -AuthResource $AuthToken
+			Get-vROpsResourceKind -OMServer 10.11.12.13 -AuthResource $AuthToken
 
 		.EXAMPLE
 			$OMserver = '10.11.12.13'
 			$AuthToken = Connect-vROpsRASession -OMServer $OMserver -Credentials $OMCreds -AuthSource "CentralIndustrial"
-			Get-vROpsAdapterKind -OMServer $OMserver -AuthToken $AuthToken.Token
+			Get-vROpsResourceKind -OMServer $OMserver -AuthToken $AuthToken.Token
 
 		.OUTPUTS
-			This will output a list of AdapterKindKeys available to the environment.
+			This will output a list of ResourceKindKeys available to the environment.
 
 		.Notes
 			.NOTES
@@ -72,10 +72,12 @@ Function Get-vROpsAdapterKind
 		$InvokeRestMethodSplat = @{
 			Headers = $Headers
 			Method = "GET"
-			ContentType = $RestType
 		}
-		$Headers.Accept = $RestType
-
+		IF (!([string]::IsNullOrEmpty($RestType)))
+		{
+			$Headers.Accept = $RestType
+			$InvokeRestMethodSplat.ContentType = $RestType
+		}
 		$BaseURL = "https://" + $OMserver + "/suite-api/api/"
 		$PageSize = "5000" #Maximum is 10000
 		$Page = 0
@@ -89,12 +91,12 @@ Function Get-vROpsAdapterKind
 			{
 				Write-Verbose "Page $($Page)"
 				$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize" #A stylistic choice was made here to highlight the BaseURL. Page and PageSize weren't so important to highlight.
-				$Adapters = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL
-				$Adapterlist += $Adapters.resources.resource.Resourcekey.adapterkindkey
+				$Resources = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL
+				$Resourcelist += $Resources.resourceList.resourceKey.resourceKindKey
 				$Page++
 			}
-			UNTIL (($Adapters.resources.links.link.href | Select -first 1) -eq ($Adapters.resources.links.link.href | Select -last 1))
-			$Adapterlist = $Adapterlist | Sort-Object | Get-Unique
+			UNTIL (($Resources.links.href | Select -first 1) -eq ($Resources.links.href | Select -last 1))
+			$Resourcelist = $Resourcelist | Sort-Object | Get-Unique
 		}
 		Catch [System.Net.WebException]
 		{
@@ -114,6 +116,6 @@ Function Get-vROpsAdapterKind
 	}
 	End
 	{
-		Return $Adapterlist
+		Return $Resourcelist
 	}
 }

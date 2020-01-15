@@ -1,4 +1,4 @@
-Function Get-vROpsAdapterKind
+Function Get-vROpsResourceProperty
 {
 	<#
 		.Synopsis
@@ -49,6 +49,11 @@ Function Get-vROpsAdapterKind
 		[string]$OMServer,
 
 		[Parameter(Mandatory,ParameterSetName="Token")]
+		[Parameter(Mandatory,ParameterSetName="Object")]
+		[ValidateNotNullOrEmpty()]
+		[string]$ResourceID,
+
+		[Parameter(Mandatory,ParameterSetName="Token")]
 		[ValidateNotNullOrEmpty()]
 		[PSObject]$AuthToken,
 
@@ -69,32 +74,19 @@ Function Get-vROpsAdapterKind
 		IF ($Type -eq "JSON") {$RestType = 'application/json'}
 		IF ($Type -eq "XML") {$RestType = "application/xml"}
 		$Headers = @{Authorization=$Authorization}
+		$Headers.Accept = $RestType
 		$InvokeRestMethodSplat = @{
 			Headers = $Headers
 			Method = "GET"
 			ContentType = $RestType
 		}
-		$Headers.Accept = $RestType
-
-		$BaseURL = "https://" + $OMserver + "/suite-api/api/"
-		$PageSize = "5000" #Maximum is 10000
-		$Page = 0
-		$Resourcelist = @()
+		$Uri = "https://$OMserver/suite-api/api/resources/$ResourceID/properties"
 	}
 	Process
 	{
 		Try
 		{
-			DO
-			{
-				Write-Verbose "Page $($Page)"
-				$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize" #A stylistic choice was made here to highlight the BaseURL. Page and PageSize weren't so important to highlight.
-				$Adapters = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL
-				$Adapterlist += $Adapters.resources.resource.Resourcekey.adapterkindkey
-				$Page++
-			}
-			UNTIL (($Adapters.resources.links.link.href | Select -first 1) -eq ($Adapters.resources.links.link.href | Select -last 1))
-			$Adapterlist = $Adapterlist | Sort-Object | Get-Unique
+			$Properties = (Invoke-RestMethod @InvokeRestMethodSplat -Uri $Uri).property
 		}
 		Catch [System.Net.WebException]
 		{
@@ -114,6 +106,6 @@ Function Get-vROpsAdapterKind
 	}
 	End
 	{
-		Return $Adapterlist
+		Return $Properties
 	}
 }
