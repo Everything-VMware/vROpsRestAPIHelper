@@ -69,17 +69,17 @@ Function Get-vROpsAdapterKind
 		IF ($Type -eq "JSON") {$RestType = 'application/json'}
 		IF ($Type -eq "XML") {$RestType = "application/xml"}
 		$Headers = @{Authorization=$Authorization}
+		$Headers.Accept += $RestType
 		$InvokeRestMethodSplat = @{
 			Headers = $Headers
 			Method = "GET"
 			ContentType = $RestType
 		}
-		$Headers.Accept = $RestType
 
 		$BaseURL = "https://" + $OMserver + "/suite-api/api/"
 		$PageSize = "5000" #Maximum is 10000
 		$Page = 0
-		$Resourcelist = @()
+		$Adapterlist = @()
 	}
 	Process
 	{
@@ -90,10 +90,11 @@ Function Get-vROpsAdapterKind
 				Write-Verbose "Page $($Page)"
 				$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize" #A stylistic choice was made here to highlight the BaseURL. Page and PageSize weren't so important to highlight.
 				$Adapters = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL
-				$Adapterlist += $Adapters.resources.resource.Resourcekey.adapterkindkey
+				IF ($Type -eq "XML") {$Adapterlist += $Adapters.resources.resource.Resourcekey.adapterkindkey}
+				IF ($Type -eq "JSON") {$Adapterlist += $Adapters.resourceList.resourcekey.adapterkindkey}
 				$Page++
 			}
-			UNTIL (($Adapters.resources.links.link.href | Select -first 1) -eq ($Adapters.resources.links.link.href | Select -last 1))
+			UNTIL ((($Adapters.resources.links.link.href | Select -first 1) -eq ($Adapters.resources.links.link.href | Select -last 1)) -AND (($Adapters.links.href | Select -first 1) -eq ($Adapters.links.href | Select -last 1)))
 			$Adapterlist = $Adapterlist | Sort-Object | Get-Unique
 		}
 		Catch [System.Net.WebException]

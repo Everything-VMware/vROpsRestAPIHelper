@@ -58,11 +58,15 @@ Function Connect-vROpsRASession
 		[Parameter(Mandatory,ParameterSetName="Credentials")]
 		[ValidateNotNullOrEmpty()]
 		[System.Management.Automation.PSCredential]$Credentials,
-		
+
 		[Parameter(ParameterSetName="Credentials")]
 		[Parameter(ParameterSetName="UsernamePwd")]
 		[switch]$UseUntrustedSSLCertificates,
-		
+
+		[Parameter(ParameterSetName="Credentials")]
+		[Parameter(ParameterSetName="UsernamePwd")]
+		[switch]$UseTLS12,
+
 		[Parameter(ParameterSetName="Credentials")]
 		[Parameter(ParameterSetName="UsernamePwd")]
 		[ValidateNotNullOrEmpty()]
@@ -71,6 +75,18 @@ Function Connect-vROpsRASession
 
 	Begin
 	{
+		Try
+		{
+			IF ($UseTLS12)
+			{
+				[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+			}
+		}
+		Catch
+		{
+			$PSItem | Get-ErrorInfo
+		}
+
 		Try
 		{
 			IF ($UseUntrustedSSLCertificates)
