@@ -69,7 +69,7 @@ Function Get-vROpsAdapterKind
 		IF ($Type -eq "JSON") {$RestType = 'application/json'}
 		IF ($Type -eq "XML") {$RestType = "application/xml"}
 		$Headers = @{Authorization=$Authorization}
-		$Headers.Accept += $RestType
+		$Headers.Accept = $RestType
 		$InvokeRestMethodSplat = @{
 			Headers = $Headers
 			Method = "GET"
