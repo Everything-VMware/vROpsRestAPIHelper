@@ -1,10 +1,9 @@
-#region Script Header
+﻿#region Script Header
 #	Thought for the day:
 #	NAME: $($ModuleName).psm1
-#	AUTHOR: $($Author)
-#	CONTACT: $($Email) / GitHub: $($GitHub) / Twitter: $($Twitter) / LinkedIn: $($LinkedIn)
-#	DATE: $($Date)
-#	VERSION: 0.1 - $($Date) - Module Created with Create-NewModuleStructure by Lars Panzerbj�rn
+#	AUTHOR: Lars Panzerbjørn
+#	CONTACT: GitHub: Panzerbjrn / Twitter: Panzerbjrn
+#	VERSION: 0.1 - $($Date) - Module Created with Create-NewModuleStructure by Lars Panzerbjørn
 #
 #	SYNOPSIS:
 #

@@ -1,5 +1,4 @@
-Function Get-vROpsAdapterKind
-{
+Function Get-vROpsAdapterKind{
 	<#
 		.Synopsis
 			Collects AdapterKinds from vROps via REST API.
@@ -34,7 +33,6 @@ Function Get-vROpsAdapterKind
 
 		.Notes
 			.NOTES
-			Version:			0.1
 			Author:				Lars Panzerbjørn
 			Creation Date:		2019.11.25
 			Purpose/Change:		Initial script development
@@ -62,8 +60,7 @@ Function Get-vROpsAdapterKind
 		[string]$Type="JSON"
 	)
 
-	Begin
-	{
+	Begin{
 		IF ($PSCmdlet.ParameterSetName -eq "Object") {$AuthToken = $AuthResource.Token}
 		$Authorization = "vRealizeOpsToken $AuthToken"
 		IF ($Type -eq "JSON") {$RestType = 'application/json'}
@@ -81,12 +78,9 @@ Function Get-vROpsAdapterKind
 		$Page = 0
 		$Adapterlist = @()
 	}
-	Process
-	{
-		Try
-		{
-			DO
-			{
+	Process{
+		Try{
+			DO{
 				Write-Verbose "Page $($Page)"
 				$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize" #A stylistic choice was made here to highlight the BaseURL. Page and PageSize weren't so important to highlight.
 				$Adapters = Invoke-RestMethod @InvokeRestMethodSplat -Uri $ResourcesURL
@@ -97,15 +91,12 @@ Function Get-vROpsAdapterKind
 			UNTIL ((($Adapters.resources.links.link.href | Select -first 1) -eq ($Adapters.resources.links.link.href | Select -last 1)) -AND (($Adapters.links.href | Select -first 1) -eq ($Adapters.links.href | Select -last 1)))
 			$Adapterlist = $Adapterlist | Sort-Object | Get-Unique
 		}
-		Catch [System.Net.WebException]
-		{
-			IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
-			{
+		Catch [System.Net.WebException]{
+			IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.'){
 				Write-Warning "Failed to login. The remote server returned an error: (401) Unauthorized."
 			}
 		}
-		Catch
-		{
+		Catch{
 			Write-Warning "Failed to get resources.
 				Exception:	$(($PSItem | Get-ErrorInfo).Exception)
 				Reason: 	$(($PSItem | Get-ErrorInfo).Reason)
@@ -113,8 +104,7 @@ Function Get-vROpsAdapterKind
 			"
 		}
 	}
-	End
-	{
+	End{
 		Return $Adapterlist
 	}
 }

@@ -1,5 +1,4 @@
-Function Get-vROpsRelationship
-{
+Function Get-vROpsRelationship{
 	<#
 		.Synopsis
 			This funtion retreives the relationships for a vROps object.
@@ -33,11 +32,9 @@ Function Get-vROpsRelationship
 		.Notes
 			.NOTES
 			Version:			1.1
-			Original Author:	David Kritschgau
-			Continuing Author:	Lars Panzerbjørn
+			Author:				Lars Panzerbjørn
 			Creation Date:		2019.11.22
 			Purpose/Change:		Initial script development
-
 	#>
 	[CmdletBinding()]
 	Param
@@ -60,8 +57,7 @@ Function Get-vROpsRelationship
 		[ValidateNotNullOrEmpty()]
 		[PSObject]$AuthResource
 	)
-	Begin
-	{
+	Begin{
 		IF ($PSCmdlet.ParameterSetName -eq "Object") {$AuthToken = $AuthResource.Token}
 		$Authorization = "vRealizeOpsToken $AuthToken"
 		$JSONContentType = 'application/json'
@@ -71,12 +67,10 @@ Function Get-vROpsRelationship
 		#$Page = 0
 		$RelationshipReport = @()
 	}
-	Process
-	{
+	Process{
 		$Relationships = Invoke-RestMethod -Uri $Uri -ContentType $JsonContentType -Headers $Headers
 		#Parse the output to get the relationships and add it to a standard object
-		ForEach ($Relationship in $Relationships.resourceList)
-		{
+		ForEach ($Relationship in $Relationships.resourceList){
 			$RelationshipReport += New-Object PSObject -Property @{
 				ID = $ID
 				ChildID = $Relationship.identIFier
@@ -85,8 +79,7 @@ Function Get-vROpsRelationship
 			}
 		}
 	}
-	End
-	{
+	End{
 		Return $RelationshipReport
 	}
 }

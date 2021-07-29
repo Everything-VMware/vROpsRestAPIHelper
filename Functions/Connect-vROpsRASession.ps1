@@ -1,5 +1,4 @@
-Function Connect-vROpsRASession
-{
+Function Connect-vROpsRASession{
 	<#
 		.Synopsis
 			Connect to vROps Rest API Session.
@@ -33,7 +32,6 @@ Function Connect-vROpsRASession
 
 		.Notes
 			.NOTES
-			Version:			0.1
 			Author:				Lars Panzerbjørn
 			Creation Date:		2019.11.21
 			Purpose/Change:		Initial script development
@@ -73,24 +71,18 @@ Function Connect-vROpsRASession
 		[string]$AuthSource
 	)
 
-	Begin
-	{
-		Try
-		{
-			IF ($UseTLS12)
-			{
+	Begin{
+		Try{
+			IF ($UseTLS12){
 				[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 			}
 		}
-		Catch
-		{
+		Catch{
 			$PSItem | Get-ErrorInfo
 		}
 
-		Try
-		{
-			IF ($UseUntrustedSSLCertificates)
-			{
+		Try{
+			IF ($UseUntrustedSSLCertificates){
 				#Allow untrusted SSL Certs
 add-type @"
 using System.Net;
@@ -106,30 +98,26 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 [System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
 			}
 		}
-		Catch
-		{
+		Catch{
 			$PSItem | Get-ErrorInfo
 		}
 		#Creating the body for the payload that will be used
 		$JsonContentType = 'application/json'
-		IF ($PSCmdlet.ParameterSetName -eq "UserNamePwd")
-		{
+		IF ($PSCmdlet.ParameterSetName -eq "UserNamePwd"){
 			Write-Verbose "ParameterSetName UsernamePwd"
 			$Body = @{
 				username = $UserName
 				password = $Password
 			}
 		}
-		IF ($PSCmdlet.ParameterSetName -eq "Credentials")
-		{
+		IF ($PSCmdlet.ParameterSetName -eq "Credentials"){
 			Write-Verbose "ParameterSetName is Credentials"
 			$Body = @{
 				username = $Credentials.UserName;
 				password = $Credentials.GetNetworkCredential().Password
 			}
 		}
-		IF (!([string]::IsNullOrEmpty($Authsource)))
-		{
+		IF (!([string]::IsNullOrEmpty($Authsource))){
 			$Body.authSource = $Authsource
 		}
 		## Construct url
@@ -144,53 +132,44 @@ public class TrustAllCertsPolicy : ICertificatePolicy {
 			ContentType = $JsonContentType
 		}
 	}
-	Process
-	{
-		Try
-		{
+	Process{
+		Try{
 			$AuthResponse = Invoke-RestMethod @AuthResponseSplat -Headers $Headers -ErrorAction STOP
 		}
-		Catch [System.Net.WebException]
-		{
-			IF (($PSItem|Get-ErrorInfo).Exception -eq "Unable to connect to the remote server")
-			{
+		Catch [System.Net.WebException]{
+			IF (($PSItem|Get-ErrorInfo).Exception -eq "Unable to connect to the remote server"){
 				Write-Warning "You are unable to connect to the remote server."
 				Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
 				Return "$(($PSItem|Get-ErrorInfo).Exception)"
 			}
-			ELSEIF (($PSItem|Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
-			{
+			ELSEIF (($PSItem|Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.'){
 				Write-Warning "You are unauthorised to connect to the remote server."
 				Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
 				Return "$(($PSItem|Get-ErrorInfo).Exception)"
 			}
-			ELSE
-			{
+			ELSE{
 				Write-Warning "You are not allowing untrusted SSL certs. Good, you shouldn't. Please try again using the -UseUntrustedSSLCertificates switch.`n Or even better, fix your certs ;-`)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 				Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
 				Return "$(($PSItem|Get-ErrorInfo).Exception)"
 			}
 		}
-		Catch [System.NullReferenceException]
-		{
+		Catch [System.NullReferenceException]{
 			Write-Warning "Object reference not set to an instance of an object."
 			Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 			Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
 			Return "$(($PSItem|Get-ErrorInfo).Exception)"
 		}
-		Catch
-		{
+		Catch{
 			Write-Warning "Something Happened"
 			Write-warning "$(($PSItem|Get-ErrorInfo).Exception)"
 			Write-warning "$(($PSItem|Get-ErrorInfo).Testing)"
 			Return "$(($PSItem|Get-ErrorInfo).Exception)"
 		}
 	}
-	End
-	{
+	End{
 		Return $AuthResponse
 	}
 }

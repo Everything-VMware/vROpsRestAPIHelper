@@ -1,5 +1,4 @@
-Function Get-vROpsResourceProperty
-{
+Function Get-vROpsResourceProperty{
 	<#
 		.Synopsis
 			Collects AdapterKinds from vROps via REST API.
@@ -67,8 +66,7 @@ Function Get-vROpsResourceProperty
 		[string]$Type="JSON"
 	)
 
-	Begin
-	{
+	Begin{
 		IF ($PSCmdlet.ParameterSetName -eq "Object") {$AuthToken = $AuthResource.Token}
 		$Authorization = "vRealizeOpsToken $AuthToken"
 		IF ($Type -eq "JSON") {$RestType = 'application/json'}
@@ -82,21 +80,16 @@ Function Get-vROpsResourceProperty
 		}
 		$Uri = "https://$OMserver/suite-api/api/resources/$ResourceID/properties"
 	}
-	Process
-	{
-		Try
-		{
+	Process{
+		Try{
 			$Properties = (Invoke-RestMethod @InvokeRestMethodSplat -Uri $Uri).property
 		}
-		Catch [System.Net.WebException]
-		{
-			IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
-			{
+		Catch [System.Net.WebException]{
+			IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.'){
 				Write-Warning "Failed to login. The remote server returned an error: (401) Unauthorized."
 			}
 		}
-		Catch
-		{
+		Catch{
 			Write-Warning "Failed to get resources.
 				Exception:	$(($PSItem | Get-ErrorInfo).Exception)
 				Reason: 	$(($PSItem | Get-ErrorInfo).Reason)
@@ -104,8 +97,7 @@ Function Get-vROpsResourceProperty
 			"
 		}
 	}
-	End
-	{
+	End{
 		Return $Properties
 	}
 }
