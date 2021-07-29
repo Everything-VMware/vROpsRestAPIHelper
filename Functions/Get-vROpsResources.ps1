@@ -1,5 +1,4 @@
-Function Get-vROpsResources
-{
+Function Get-vROpsResources{
 	<#
 		.Synopsis
 			Collects resources from vROps via REST API.
@@ -69,8 +68,7 @@ Function Get-vROpsResources
 		[string]$Type="JSON"
 	)
 
-	Begin
-	{
+	Begin{
 		Write-Verbose "Beginning"
 		$BaseURL = "https://" + $OMserver + "/suite-api/api/"
 		$PageSize = "5000" #Maximum is 10000
@@ -83,30 +81,23 @@ Function Get-vROpsResources
 		IF ($Type -eq "JSON") {$RestType = 'application/json'}
 		IF ($Type -eq "XML") {$RestType = "application/xml"}
 		$Headers = @{Authorization=$Authorization}
-		IF (!([string]::IsNullOrEmpty($RestType)))
-		{
+		IF (!([string]::IsNullOrEmpty($RestType))){
 			$Headers.Accept = $RestType
 			$InvokeRestMethodSplat.ContentType = $RestType
 		}
 		$InvokeRestMethodSplat.Headers = $Headers
 	}
-	Process
-	{
+	Process{
 		Write-Verbose "Processing"
-		IF ($Type -eq "JSON")
-		{
-			Try
-			{
-				DO
-				{
+		IF ($Type -eq "JSON"){
+			Try{
+				DO{
 					Write-Verbose "Page $($Page)"
-					IF (!([string]::IsNullOrEmpty($ResourceKind)))
-					{
+					IF (!([string]::IsNullOrEmpty($ResourceKind))){
 						Write-Verbose "Using ResourceKind: $($ResourceKind)"
 						$ResourcesURL = $BaseURL + "adapterkinds/" + $ResourceKind + "/resources/?page=$page&pageSize=$PageSize"
 					}
-					IF ([string]::IsNullOrEmpty($ResourceKind))
-					{
+					IF ([string]::IsNullOrEmpty($ResourceKind)){
 						Write-Verbose "Getting all Resources"
 						$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize"
 					}
@@ -116,15 +107,12 @@ Function Get-vROpsResources
 				}
 				UNTIL (($Resources.links.href | Select -first 1) -eq ($Resources.links.href | Select -last 1))
 			}
-			Catch [System.Net.WebException]
-			{
-				IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
-				{
+			Catch [System.Net.WebException]{
+				IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.'){
 					Write-Warning "Failed to login. The remote server returned an error: (401) Unauthorized."
 				}
 			}
-			Catch
-			{
+			Catch{
 				Write-Warning "Failed to get resources.
 					Exception:	$(($PSItem | Get-ErrorInfo).Exception)
 					Reason: 	$(($PSItem | Get-ErrorInfo).Reason)
@@ -132,20 +120,15 @@ Function Get-vROpsResources
 				"
 			}
 		}
-		IF ($Type -eq "XML")
-		{
-			Try
-			{
-				DO
-				{
+		IF ($Type -eq "XML"){
+			Try{
+				DO{
 					Write-Verbose "Page $($Page)"
-					IF (!([string]::IsNullOrEmpty($ResourceKind)))
-					{
+					IF (!([string]::IsNullOrEmpty($ResourceKind))){
 						Write-Verbose "Using ResourceKind: $($ResourceKind)"
 						$ResourcesURL = $BaseURL + "adapterkinds/" + $ResourceKind + "/resources/?page=$page&pageSize=$PageSize"
 					}
-					IF ([string]::IsNullOrEmpty($ResourceKind))
-					{
+					IF ([string]::IsNullOrEmpty($ResourceKind)){
 						Write-Verbose "Getting all Resources"
 						$ResourcesURL = $BaseURL + "resources/?page=$page&pageSize=$PageSize"
 					}
@@ -155,15 +138,12 @@ Function Get-vROpsResources
 				}
 				UNTIL (($Resources.links.href | Select -first 1) -eq ($Resources.links.href | Select -last 1))
 			}
-			Catch [System.Net.WebException]
-			{
-				IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.')
-				{
+			Catch [System.Net.WebException]{
+				IF (($PSItem | Get-ErrorInfo).Exception -eq 'The remote server returned an error: (401) Unauthorized.'){
 					Write-Warning "Failed to login. The remote server returned an error: (401) Unauthorized."
 				}
 			}
-			Catch
-			{
+			Catch{
 				Write-Warning "Failed to get resources.
 					Exception:	$(($PSItem | Get-ErrorInfo).Exception)
 					Reason: 	$(($PSItem | Get-ErrorInfo).Reason)
@@ -172,8 +152,7 @@ Function Get-vROpsResources
 			}
 		}
 	}
-	End
-	{
+	End{
 		Write-Verbose "Ending"
 		Return $Resourcelist
 	}
