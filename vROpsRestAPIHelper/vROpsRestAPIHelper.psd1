@@ -11,7 +11,7 @@
 	RootModule = 'vROpsRestAPIHelper.psm1'
 
 	# Version number of this module.
-	ModuleVersion = '1.0.0'
+	ModuleVersion = '1.0.1'
 
 	# ID used to uniquely identify this module
 	GUID = 'd7bffe1e-072a-48c3-be27-71748d19e2c2'
