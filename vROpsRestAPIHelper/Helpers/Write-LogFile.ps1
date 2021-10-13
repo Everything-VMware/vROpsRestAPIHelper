@@ -19,8 +19,7 @@ Function Write-LogFile
 	$CaptainsLog = "$(Get-Date -UFormat "%Y.%m.%d_%R") - $($Severity): $Message"
 	IF (!(Test-Path $LogFilePath)) {New-Item -ItemType File -Path $LogFilePath -Force}
 	
-	DO
-	{
+	DO{
 		Try
 		{
 			Add-Content -Path $LogFilePath -Value $CaptainsLog
