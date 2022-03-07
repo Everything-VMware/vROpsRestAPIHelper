@@ -82,7 +82,7 @@ Function Connect-vROpsRASession{
 		}
 
 		Try{
-			IF ($UseUntrustedSSLCertificates){
+			IF (($UseUntrustedSSLCertificates) -and ($PSVersionTable.PSVersion.Major -eq 5)){
 				#Allow untrusted SSL Certs
 add-type @"
 using System.Net;
